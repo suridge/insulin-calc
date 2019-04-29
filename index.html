@@ -10,9 +10,36 @@
     <script>
 
     function calculate() {
-      alert('foo')
-    }
 
+      var bgTarget = document.getElementById("bg-target").value;
+      var bgCurrent = document.getElementById("bg-current").value;
+      var corrFactor = document.getElementById("corr-factor").value;
+      var corrDose = ((bgCurrent - bgTarget)/corrFactor);
+      document.getElementById("corr-dose").value = corrDose;
+
+      var carbTotal = document.getElementById("carb-total").value;
+      var carbRatio = document.getElementById("ins-carb-ratio").value;
+      var carbDose = carbTotal / carbRatio;
+      document.getElementById("carb-dose").value = carbDose;
+
+      document.getElementById("total-dose").value = corrDose + carbDose;
+
+      // what ghappens if we round up?
+      ceilDose = Math.ceil(corrDose + carbDose)
+      ceilCorrDose = ceilDose - carbDose;
+      ceilBG = bgCurrent-(corrFactor*ceilCorrDose);
+      document.getElementById("ceil-glucose").innerHTML = ceilDose + " units of insulin, estimated blood glucose level of " + ceilBG.toPrecision(2)
+
+      // what ghappens if we round down?
+      floorDose = Math.floor(corrDose + carbDose)
+      floorCorrDose = floorDose - carbDose;
+      floorBG = bgCurrent-(corrFactor*floorCorrDose);
+
+      document.getElementById("floor-glucose").innerHTML = floorDose + " units of insulin, estimated blood glucose level of " + floorBG.toPrecision(2)
+
+
+
+    }
 
 
     </script>
@@ -25,7 +52,7 @@
       <div class="row">
         <div class="col-md-6 order-md-6 mb-6">
           <label for="bg-target">Blood glucose target</label>
-          <input type="text" class="form-control" id="bg-target" placeholder="7" required="true">
+          <input type="text" class="form-control" id="bg-target" placeholder="" required="true" value="7" onblur="calculate()">
           <small class="text-muted">Target blood glucose level in mmol/L</small>
         </div>
       </div>
@@ -41,7 +68,7 @@
       <div class="row">
         <div class="col-md-6 order-md-6 mb-6">
           <label for="corr-factor">Correction factor</label>
-          <input type="text" class="form-control" id="corr-factor" placeholder="3" required="true">
+          <input type="text" class="form-control" id="corr-factor" placeholder="3" required="true" value="3" onblur="calculate()">
           <small class="text-muted">How much will 1 unit of insulin reduce the blood glucose level in mmol/L?</small>
         </div>
       </div>
@@ -49,8 +76,49 @@
       <div class="row">
         <div class="col-md-6 order-md-6 mb-6">
           <label for="corr-dose">Correction dose</label>
-          <input type="text" class="form-control" id="corr-dose" placeholder="3" required="true">
+          <input type="text" class="form-control" id="corr-dose" placeholder="" readonly="true">
           <small class="text-muted">The amount of insulin required to lower blood glucose level to the target level</small>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 order-md-6 mb-6">
+          <label for="carb-total">Carb total</label>
+          <input type="text" class="form-control" id="carb-total" placeholder="" required="true" value="0" onblur="calculate()">
+          <small class="text-muted">The amount of carbohydrate in the meal in grams</small>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 order-md-6 mb-6">
+          <label for="ins-carb-ratio">Insulin : Carb ratio</label>
+          <input type="text" class="form-control" id="ins-carb-ratio" placeholder="" required="true" value="10" onblur="calculate()">
+          <small class="text-muted">The amount of carbohydrate that 1 unit of insulin will dispose</small>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 order-md-6 mb-6">
+          <label for="carb-dose">Carb coverage dose</label>
+          <input type="text" class="form-control" id="carb-dose" placeholder="" readonly="true" required="true" >
+          <small class="text-muted">The amount of insulin required to dispose of the mealtime carbohydrate.</small>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 order-md-6 mb-6">
+          <label for="total-dose">Total Insulin</label>
+          <input type="text" class="form-control" id="total-dose" placeholder="" readonly="true" required="true" >
+        </div>
+      </div>
+
+      <div class="row">
+        <div id="ceil-glucose" class="col-md-6 order-md-6 mb-6">
+        </div>
+      </div>
+
+      <div class="row">
+        <div id="floor-glucose" class="col-md-6 order-md-6 mb-6">
         </div>
       </div>
 
