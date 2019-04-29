@@ -7,8 +7,16 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script>
 
-    <title>Hello, world!</title>
+    function calculate() {
+      alert('foo')
+    }
+
+
+
+    </script>
+    <title>Insulin Calculator</title>
   </head>
   <body class="bg-light">
     <div class="container">
@@ -25,8 +33,24 @@
       <div class="row">
         <div class="col-md-6 order-md-6 mb-6">
           <label for="bg-current">Current blood glucose level</label>
-          <input type="text" class="form-control" id="bg-current" placeholder="" required="true">
+          <input type="text" class="form-control" id="bg-current" placeholder="" required="true" onblur="calculate()">
           <small class="text-muted">Current blood glucose level in mmol/L</small>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 order-md-6 mb-6">
+          <label for="corr-factor">Correction factor</label>
+          <input type="text" class="form-control" id="corr-factor" placeholder="3" required="true">
+          <small class="text-muted">How much will 1 unit of insulin reduce the blood glucose level in mmol/L?</small>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 order-md-6 mb-6">
+          <label for="corr-dose">Correction dose</label>
+          <input type="text" class="form-control" id="corr-dose" placeholder="3" required="true">
+          <small class="text-muted">The amount of insulin required to lower blood glucose level to the target level</small>
         </div>
       </div>
 
