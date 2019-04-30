@@ -11,44 +11,73 @@
 
 <script>
 
+function init(){
+  var d = new Date();
+  var date = d.toLocaleDateString();
+  var time = d.toLocaleTimeString();
+  var hour = d.getHours();
+  // morning
+  if ( hour < 12 ){
+    var tod = "breakfast"
+    var targetBGMin = 5.5;
+    var targetBGMax = 7.5;
+    var carbRatio = 15;
+  }
+  // lunch
+  else if ( hour < 14) {
+    var tod = "lunch"
+    var targetBGMin = 4.5;
+    var targetBGMax = 7.5;
+    var carbRatio = 10;
+  }
+  // tea
+  else if ( hour < 19) {
+    var tod = "dinner"
+    var targetBGMin = 4.5;
+    var targetBGMax = 7.5;
+    var carbRatio = 10;
+  }
+  // eve
+  else {
+    var tod = "evening"
+    var targetBGMin = 6.5;
+    var targetBGMax = 8.0;
+    var carbRatio = 10;
+  }
+  document.getElementById("time-of-day").innerHTML = "Today is " + date + ", " + time + " (" + tod + ")"
+  document.getElementById("bg-target").value = (targetBGMin+targetBGMax)/2
+  document.getElementById("ins-carb-ratio").value = carbRatio;
+
+
+  // Total Daily Insulin Requirement = 0.55 * weight
+  var tdir = 0.55 * document.getElementById("body_weight").value
+  // basal is 40% of tdir
+  var basal = tdir * 0.40
+
+  /*
+  The carbohydate coverage ratio:
+  500 ÷ Total Daily Insulin Dose
+  = 1 unit insulin covers so many grams of carbohydrate
+  */
+  var carbohydateCoverageRatio = (500 / tdir).toPrecision(3);
+  //document.getElementById("ins-carb-ratio").value = carbohydateCoverageRatio;
+
+  /*
+  The high blood sugar correction factor:
+  Correction Factor = 1800 ÷Total Daily Insulin Dose = 1 unit of insulin will reduce the blood sugar so many mg/dl
+  Divide by 18 to get mmol/l
+  */
+  var correctionFactor = 100 / tdir;
+
+  var corrFactor = correctionFactor.toPrecision(3);
+  //document.getElementById("corr-factor").value = corrFactor;
+
+}
+
 
     function calculate() {
 
-      var d = new Date();
-      var date = d.toLocaleDateString();
-      var time = d.toLocaleTimeString();
-      var hour = d.getHours();
-      // morning
-      if ( hour < 12 ){
-        var tod = "breakfast"
-        var targetBGMin = 5.5;
-        var targetBGMax = 7.5;
-        var carbRatio = 15;
-      }
-      // lunch
-      else if ( hour < 14) {
-        var tod = "lunch"
-        var targetBGMin = 4.5;
-        var targetBGMax = 7.5;
-        var carbRatio = 10;
-      }
-      // tea
-      else if ( hour < 19) {
-        var tod = "dinner"
-        var targetBGMin = 4.5;
-        var targetBGMax = 7.5;
-        var carbRatio = 10;
-      }
-      // eve
-      else {
-        var tod = "evening"
-        var targetBGMin = 6.5;
-        var targetBGMax = 8.0;
-        var carbRatio = 10;
-      }
-      document.getElementById("time-of-day").innerHTML = "Today is " + date + ", " + time + " (" + tod + ")"
-      document.getElementById("bg-target").value = (targetBGMin+targetBGMax)/2
-      document.getElementById("ins-carb-ratio").value = carbRatio;
+
 
       var bgTarget = document.getElementById("bg-target").value;
       var bgCurrent = document.getElementById("bg-current").value;
@@ -62,15 +91,15 @@
         document.getElementById("bg-current").classList.remove('is-invalid');
         document.getElementById("bg-current").classList.add('is-valid');
       }
-      var corrFactor = 3;
-      document.getElementById("corr-factor").value = corrFactor;
+
+      var corrFactor = document.getElementById("corr-factor").value;
       var corrDose = ((bgCurrent - bgTarget)/corrFactor);
       document.getElementById("corr-dose").value = corrDose.toPrecision(3);
 
       var carbTotal = document.getElementById("carb-total").value;
       var carbRatio = document.getElementById("ins-carb-ratio").value;
       var carbDose = carbTotal / carbRatio;
-      document.getElementById("carb-dose").value = carbDose;
+      document.getElementById("carb-dose").value = carbDose.toPrecision(3);
 
       document.getElementById("total-dose").value = (corrDose + carbDose).toPrecision(3);
 
@@ -95,18 +124,26 @@
     </script>
     <title>Insulin Calculator</title>
   </head>
-  <body class="bg-light" onload="calculate()">
+  <body class="bg-light" onload="init()">
     <div class="container">
       <h3><i class="fas fa-syringe"></i> Insulin Calculator v0.3</h3>
       <small id="time-of-day" class="text-muted"></small>
       <form class="needs-validation" novalidate>
-      <div class="row">
-        <div class="col-md-8 order-md-8 mb-8">
-          <label for="bg-target"><i class="fas fa-thermometer-quarter"></i> Target blood glucose level</label>
-          <input type="number" class="form-control is-valid" id="bg-target" placeholder="" required="true" value="7" onchange="calculate()">
-          <small class="text-muted">Target blood glucose level in mmol/L</small>
+        <div class="row">
+          <div class="col-md-8 order-md-8 mb-8 collapse">
+            <label for="body_weight"><i class="fas fa-weight"></i> Current body weight</label>
+            <input type="number" class="form-control is-valid" id="body_weight" placeholder="" required="true" value="68" onchange="init()">
+            <small class="text-muted">Body weight, used to determine total insulin requirement, correction factor and carb ratio</small>
+          </div>
         </div>
-      </div>
+
+        <div class="row">
+          <div class="col-md-8 order-md-8 mb-8">
+            <label for="bg-target"><i class="fas fa-thermometer-quarter"></i> Target blood glucose level</label>
+            <input type="number" class="form-control is-valid" id="bg-target" placeholder="" required="true" value="7" onchange="calculate()">
+            <small class="text-muted">Target blood glucose level in mmol/L</small>
+          </div>
+        </div>
 
       <div class="row">
         <div class="col-md-8 order-md-8 mb-8">
