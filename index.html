@@ -7,12 +7,26 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+<script>
+
 
     function calculate() {
 
       var bgTarget = document.getElementById("bg-target").value;
       var bgCurrent = document.getElementById("bg-current").value;
+      if (bgCurrent == 0){
+        document.getElementById("bg-current").value = '';
+        document.getElementById("bg-current").classList.add('is-invalid');
+        document.getElementById("bg-current").focus();
+        return
+      }
+      else {
+        document.getElementById("bg-current").classList.remove('is-invalid');
+        document.getElementById("bg-current").classList.add('is-valid');
+      }
+
       var corrFactor = document.getElementById("corr-factor").value;
       var corrDose = ((bgCurrent - bgTarget)/corrFactor);
       document.getElementById("corr-dose").value = corrDose;
@@ -24,7 +38,7 @@
 
       document.getElementById("total-dose").value = corrDose + carbDose;
 
-      // what ghappens if we round up?
+      // what happens if we round up?
       ceilDose = Math.ceil(corrDose + carbDose)
       ceilCorrDose = ceilDose - carbDose;
       ceilBG = bgCurrent-(corrFactor*ceilCorrDose);
@@ -36,7 +50,7 @@
       floorBG = bgCurrent-(corrFactor*floorCorrDose);
 
       document.getElementById("floor-glucose").innerHTML = "<b>" + floorDose + "</b> insulin = blood glucose <b>" + floorBG.toPrecision(2)+ "</b> mmol/L"
-
+      $('.collapse').collapse('show')
 
 
     }
@@ -45,22 +59,22 @@
     </script>
     <title>Insulin Calculator</title>
   </head>
-  <body class="bg-light">
+  <body class="bg-light" onload="calculate()">
     <div class="container">
-      <h3>Insulin Calculator v0.2</h3>
-
+      <h3><i class="fas fa-syringe"></i> Insulin Calculator v0.2</h3>
+      <form class="needs-validation" novalidate>
       <div class="row">
         <div class="col-md-8 order-md-8 mb-8">
-          <label for="bg-target">Blood glucose target</label>
-          <input type="text" class="form-control" id="bg-target" placeholder="" required="true" value="7" onblur="calculate()">
+          <label for="bg-target"><i class="fas fa-thermometer-quarter"></i> Target blood glucose level</label>
+          <input type="number" class="form-control is-valid" id="bg-target" placeholder="" required="true" value="7" onblur="calculate()">
           <small class="text-muted">Target blood glucose level in mmol/L</small>
         </div>
       </div>
 
       <div class="row">
         <div class="col-md-8 order-md-8 mb-8">
-          <label for="bg-current">Current blood glucose level</label>
-          <input type="text" class="form-control" id="bg-current" placeholder="" required="true" onblur="calculate()">
+          <label for="bg-current"><i class="fas fa-thermometer-half"></i> Current blood glucose level</label>
+          <input type="number" class="form-control" id="bg-current" placeholder="" required value="0" onblur="calculate()">
           <small class="text-muted">Current blood glucose level in mmol/L</small>
         </div>
       </div>
@@ -68,7 +82,7 @@
       <div class="row">
         <div class="col-md-8 order-md-8 mb-8">
           <label for="corr-factor">Correction factor</label>
-          <input type="text" class="form-control" id="corr-factor" placeholder="3" required="true" value="3" onblur="calculate()">
+          <input type="number" class="form-control is-valid" id="corr-factor" placeholder="3" required="true" value="3" onblur="calculate()">
           <small class="text-muted">How much will 1 unit of insulin reduce the blood glucose level in mmol/L?</small>
         </div>
       </div>
@@ -76,15 +90,15 @@
       <div class="row">
         <div class="col-md-8 order-md-8 mb-8">
           <label for="corr-dose">Correction dose</label>
-          <input type="text" class="form-control" id="corr-dose" placeholder="" readonly="true">
+          <input type="number" class="form-control" id="corr-dose" placeholder="" readonly="true">
           <small class="text-muted">The amount of insulin required to lower blood glucose level to the target level</small>
         </div>
       </div>
 
       <div class="row">
         <div class="col-md-8 order-md-8 mb-8">
-          <label for="carb-total">Carb total</label>
-          <input type="text" class="form-control" id="carb-total" placeholder="" required="true" value="0" onblur="calculate()">
+          <label for="carb-total"><i class="fas fa-utensils"></i> Carb total</label>
+          <input type="text" class="form-control is-valid" id="carb-total" placeholder="" required="true" value="0" onblur="calculate()">
           <small class="text-muted">The amount of carbohydrate in the meal in grams</small>
         </div>
       </div>
@@ -92,7 +106,7 @@
       <div class="row">
         <div class="col-md-8 order-md-8 mb-8">
           <label for="ins-carb-ratio">Insulin : Carb ratio</label>
-          <input type="text" class="form-control" id="ins-carb-ratio" placeholder="" required="true" value="10" onblur="calculate()">
+          <input type="number" class="form-control" id="ins-carb-ratio" placeholder="" required="true" value="10" onblur="calculate()">
           <small class="text-muted">The amount of carbohydrate that 1 unit of insulin will dispose</small>
         </div>
       </div>
@@ -100,7 +114,7 @@
       <div class="row">
         <div class="col-md-8 order-md-8 mb-8">
           <label for="carb-dose">Carb coverage dose</label>
-          <input type="text" class="form-control" id="carb-dose" placeholder="" readonly="true" required="true" >
+          <input type="number" class="form-control" id="carb-dose" placeholder="" readonly="true" required="true" >
           <small class="text-muted">The amount of insulin required to dispose of the mealtime carbohydrate.</small>
         </div>
       </div>
@@ -108,23 +122,29 @@
       <div class="row">
         <div class="col-md-8 order-md-8 mb-8">
           <label for="total-dose">Total Insulin</label>
-          <input type="text" class="form-control" id="total-dose" placeholder="" readonly="true" required="true" >
+          <input type="number" class="form-control" id="total-dose" placeholder="" readonly="true" required="true" >
         </div>
       </div>
 
       <div class="row">
-        <div id="ceil-glucose" class="col-md-8 order-md-8 mb-8">
+        <div class="col-md-8 order-md-8 mb-8">
+          <div class="card collapse" id="ceil-card">
+            <div class="card-body">
+              <p id="ceil-glucose" class="card-text"></p>
+            </div>
+          </div>
         </div>
       </div>
-
       <div class="row">
-      </div>
-
-      <div class="row">
-        <div id="floor-glucose" class="col-md-8 order-md-8 mb-8">
+        <div class="col-md-8 order-md-8 mb-8">
+          <div class="card collapse" id="floor-card">
+            <div class="card-body">
+              <p id="floor-glucose" class="card-text"></p>
+            </div>
+          </div>
         </div>
       </div>
-
+    </form>
 
     </div>
 
@@ -134,5 +154,5 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-  </body>
+</body>
 </html>
