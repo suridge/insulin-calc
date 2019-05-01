@@ -360,6 +360,7 @@
           }
         }, function(response) {
           console.log('Error: ' + response.result.error.message);
+          document.getElementById("welcome_text").innerHTML = response.result.error.message;
         });
       }
 
