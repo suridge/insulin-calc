@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+<script>
+
+function init(){
+  var d = new Date();
+  var date = d.toLocaleDateString();
+  var time = d.toLocaleTimeString();
+  var hour = d.getHours();
+  // morning
+  if ( hour < 12 ){
+    var tod = "breakfast"
+    var targetBGMin = 5.5;
+    var targetBGMax = 7.5;
+    var carbRatio = 15;
+  }
+  // lunch
+  else if ( hour < 14) {
+    var tod = "lunch"
+    var targetBGMin = 4.5;
+    var targetBGMax = 7.5;
+    var carbRatio = 10;
+  }
+  // tea
+  else if ( hour < 19) {
+    var tod = "dinner"
+    var targetBGMin = 4.5;
+    var targetBGMax = 7.5;
+    var carbRatio = 10;
+  }
+  // eve
+  else {
+    var tod = "evening"
+    var targetBGMin = 6.5;
+    var targetBGMax = 8.0;
+    var carbRatio = 10;
+  }
+  document.getElementById("time-of-day").innerHTML = "Today is " + date + ", " + time + " (" + tod + ")"
+  document.getElementById("bg-target").value = (targetBGMin+targetBGMax)/2
+  document.getElementById("ins-carb-ratio").value = carbRatio;
+
+
+  // Total Daily Insulin Requirement = 0.55 * weight
+  var tdir = 0.55 * document.getElementById("body_weight").value
+  // basal is 40% of tdir
+  var basal = tdir * 0.40
+
+  /*
+  The carbohydate coverage ratio:
+  500 ÷ Total Daily Insulin Dose
+  = 1 unit insulin covers so many grams of carbohydrate
+  */
+  var carbohydateCoverageRatio = (500 / tdir).toPrecision(3);
+  //document.getElementById("ins-carb-ratio").value = carbohydateCoverageRatio;
+
+  /*
+  The high blood sugar correction factor:
+  Correction Factor = 1800 ÷Total Daily Insulin Dose = 1 unit of insulin will reduce the blood sugar so many mg/dl
+  Divide by 18 to get mmol/l
+  */
+  var correctionFactor = 100 / tdir;
+
+  var corrFactor = correctionFactor.toPrecision(3);
+  //document.getElementById("corr-factor").value = corrFactor;
+
+}
+
+
+    function calculate() {
+
+
+
+      var bgTarget = document.getElementById("bg-target").value;
+      var bgCurrent = document.getElementById("bg-current").value;
+      if (bgCurrent == 0){
+        document.getElementById("bg-current").value = '';
+        document.getElementById("bg-current").classList.add('is-invalid');
+        document.getElementById("bg-current").focus();
+        return;
+      }
+      else {
+        document.getElementById("bg-current").classList.remove('is-invalid');
+        document.getElementById("bg-current").classList.add('is-valid');
+      }
+
+      var corrFactor = document.getElementById("corr-factor").value;
+      var corrDose = ((bgCurrent - bgTarget)/corrFactor);
+      document.getElementById("corr-dose").value = corrDose.toPrecision(3);
+
+      var carbTotal = document.getElementById("carb-total").value;
+      var carbRatio = document.getElementById("ins-carb-ratio").value;
+      var carbDose = carbTotal / carbRatio;
+      document.getElementById("carb-dose").value = carbDose.toPrecision(3);
+
+      document.getElementById("total-dose").value = (corrDose + carbDose).toPrecision(3);
+
+      // what happens if we round up?
+      ceilDose = Math.ceil(corrDose + carbDose)
+      ceilCorrDose = ceilDose - carbDose;
+      ceilBG = bgCurrent-(corrFactor*ceilCorrDose);
+      document.getElementById("ceil-glucose").innerHTML = "<b>" + ceilDose + "</b> insulin = blood glucose <b>" + ceilBG.toPrecision(2) + "</b> mmol/L"
+
+      // what ghappens if we round down?
+      floorDose = Math.floor(corrDose + carbDose)
+      floorCorrDose = floorDose - carbDose;
+      floorBG = bgCurrent-(corrFactor*floorCorrDose);
+
+      document.getElementById("floor-glucose").innerHTML = "<b>" + floorDose + "</b> insulin = blood glucose <b>" + floorBG.toPrecision(2)+ "</b> mmol/L"
+      $('.collapse').collapse('show')
+
+
+    }
+
+
+    </script>
+    <title>Insulin Calculator</title>
+  </head>
+  <body class="bg-light" onload="init()">
+    <div class="container">
+      <h3><i class="fas fa-syringe"></i> Insulin Calculator v0.3</h3>
+      <small id="time-of-day" class="text-muted"></small>
+      <form class="needs-validation" novalidate>
+        <div class="row">
+          <div class="col-md-8 order-md-8 mb-8 collapse">
+            <label for="body_weight"><i class="fas fa-weight"></i> Current body weight</label>
+            <input type="number" class="form-control is-valid" id="body_weight" placeholder="" required="true" value="68" onchange="init()">
+            <small class="text-muted">Body weight, used to determine total insulin requirement, correction factor and carb ratio</small>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-8 order-md-8 mb-8">
+            <label for="bg-target"><i class="fas fa-thermometer-quarter"></i> Target blood glucose level</label>
+            <input type="number" class="form-control is-valid" id="bg-target" placeholder="" required="true" value="7" onchange="calculate()">
+            <small class="text-muted">Target blood glucose level in mmol/L</small>
+          </div>
+        </div>
+
+      <div class="row">
+        <div class="col-md-8 order-md-8 mb-8">
+          <label for="bg-current"><i class="fas fa-thermometer-half"></i> Current blood glucose level</label>
+          <input type="number" class="form-control" id="bg-current" placeholder="" required value="0" onchange="calculate()">
+          <small class="text-muted">Current blood glucose level in mmol/L</small>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8 order-md-8 mb-8">
+          <label for="corr-factor">Correction factor</label>
+          <input type="number" class="form-control is-valid" id="corr-factor" placeholder="3" required="true" value="3" onchange="calculate()">
+          <small class="text-muted">How much will 1 unit of insulin reduce the blood glucose level in mmol/L?</small>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8 order-md-8 mb-8">
+          <label for="corr-dose">Correction dose</label>
+          <input type="number" class="form-control" id="corr-dose" placeholder="" readonly="true">
+          <small class="text-muted">The amount of insulin required to lower blood glucose level to the target level</small>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8 order-md-8 mb-8">
+          <label for="carb-total"><i class="fas fa-utensils"></i> Carb total</label>
+          <input type="number" class="form-control is-valid" id="carb-total" placeholder="" required="true" value="0" onchange="calculate()">
+          <small class="text-muted">The amount of carbohydrate in the meal in grams</small>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8 order-md-8 mb-8">
+          <label for="ins-carb-ratio">Insulin : Carb ratio</label>
+          <input type="number" class="form-control" id="ins-carb-ratio" placeholder="" required="true" value="10" onchange="calculate()">
+          <small class="text-muted">The amount of carbohydrate that 1 unit of insulin will dispose</small>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8 order-md-8 mb-8">
+          <label for="carb-dose">Carb coverage dose</label>
+          <input type="number" class="form-control" id="carb-dose" placeholder="" readonly="true" required="true" >
+          <small class="text-muted">The amount of insulin required to dispose of the mealtime carbohydrate.</small>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8 order-md-8 mb-8">
+          <label for="total-dose">Total Insulin</label>
+          <input type="number" class="form-control" id="total-dose" placeholder="" readonly="true" required="true" >
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8 order-md-8 mb-8">
+          <div class="card collapse" id="ceil-card">
+            <div class="card-body">
+              <p id="ceil-glucose" class="card-text"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-8 order-md-8 mb-8">
+          <div class="card collapse" id="floor-card">
+            <div class="card-body">
+              <p id="floor-glucose" class="card-text"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    </div>
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+</html>

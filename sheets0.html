@@ -23,7 +23,7 @@
 
       // Authorization scopes required by the API; multiple scopes can be
       // included, separated by spaces.
-      var SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly";
+      var SCOPES = "https://www.googleapis.com/auth/spreadsheets";
 
       var authorizeButton = document.getElementById('authorize_button');
       var signoutButton = document.getElementById('signout_button');
@@ -49,6 +49,9 @@
           // Listen for sign-in state changes.
           gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
 
+
+
+
           // Handle the initial sign-in state.
           updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
           authorizeButton.onclick = handleAuthClick;
@@ -66,6 +69,20 @@
         if (isSignedIn) {
           authorizeButton.style.display = 'none';
           signoutButton.style.display = 'block';
+
+
+
+                      var profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile();
+                      console.log('ID: ' + profile.getId());
+                      console.log('Full Name: ' + profile.getName());
+                      console.log('Given Name: ' + profile.getGivenName());
+                      console.log('Family Name: ' + profile.getFamilyName());
+                      console.log('Image URL: ' + profile.getImageUrl());
+                      console.log('Email: ' + profile.getEmail());
+
+
+
+
           listMajors();
         } else {
           authorizeButton.style.display = 'block';
@@ -122,6 +139,7 @@
           appendPre('Error: ' + response.result.error.message);
         });
       }
+
 
     </script>
 
