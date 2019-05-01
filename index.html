@@ -352,6 +352,7 @@
             }
             if (! foundUserConfig) {
               console.log('did not find user config for :' + name )
+              document.getElementById("welcome_text").innerHTML = ""
               document.getElementById('settings_title').innerHTML = "<i class='fas fa-user-cog'></i> " + firstName + "'s Settings";
               settingsContainer.style.display = 'block';
             }
