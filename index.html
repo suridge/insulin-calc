@@ -35,7 +35,7 @@
       </div>
       <div class="row pt-1">
         <div class="col-md-8 order-md-8 mb-8">
-          <label for="body_weight"><i class="fas fa-weight"></i> Current body weight</label>
+          <label for="body_weight"><i class="fas fa-weight"></i> Current body weight (kg)</label>
           <input type="number" class="form-control is-valid" id="config-weight" placeholder="" required="true" value="68">
           <small class="text-muted">Body weight, used to determine total insulin requirement, correction factor and carb ratio</small>
         </div>
@@ -197,7 +197,7 @@
           var targetBGMax = 8.0;
           // var carbRatio = 10;
         }
-        document.getElementById("welcome_text").innerHTML = "Welcome " + name + " today is " + date + ", " + time + " (" + tod + ")"
+        document.getElementById("welcome_text").innerHTML = "Welcome " + firstName + " today is " + date + ", " + time + " (" + tod + ")"
         document.getElementById("bg-target").value = (targetBGMin+targetBGMax)/2
         document.getElementById("ins-carb-ratio").value = carbRatio;
 
@@ -341,18 +341,19 @@
           if (range.values.length > 0) {
             for (i = 0; i < range.values.length; i++) {
               var row = range.values[i];
-              console.log(row);
               if (row[0] == email ){
                 foundUserConfig = true;
                 weight = row[1];
                 corrFactor = row[2];
                 carbRatio = row[3];
+                console.log("found user on row " + (i+2) )
+                userConfigRange = "UserConfig!A" + (i+2)
                 init();
               }
             }
             if (! foundUserConfig) {
               console.log('did not find user config for :' + name )
-              document.getElementById("welcome_text").innerHTML = ""
+              document.getElementById("welcome_text").innerHTML = "";
               document.getElementById('settings_title').innerHTML = "<i class='fas fa-user-cog'></i> " + firstName + "'s Settings";
               settingsContainer.style.display = 'block';
             }
@@ -366,16 +367,35 @@
       }
 
       function saveUserConfig() {
-        console.log(name);
-        console.log(firstName);
-        console.log(email);
-        weight = document.getElementById('config-weight').value;
-        console.log(weight);
-        corrFactor = document.getElementById('config-corr-factor').value;
-        console.log(corrFactor);
-        carbRatio = document.getElementById('config-carb-ratio').value;
-        console.log(carbRatio);
 
+        weight = document.getElementById('config-weight').value;
+        corrFactor = document.getElementById('config-corr-factor').value;
+        carbRatio = document.getElementById('config-carb-ratio').value;
+        var params = {
+          spreadsheetId: '1uSQONHR01QeRyEWGS5WRSQCBETzC-hc8p4i45DGjM-A',
+          range: 'UserConfig!A1',
+          valueInputOption: 'USER_ENTERED',
+        };
+        var valueRangeBody = {
+          "range": "UserConfig!A1",
+           "majorDimension": "ROWS",
+           "values": [
+             [ email, weight, corrFactor, carbRatio ]
+           ]
+        };
+        var request = gapi.client.sheets.spreadsheets.values.append(params, valueRangeBody);
+        request.then(function(response) {
+          //console.log(response.result);
+          userConfigRange = response.result.updates.updatedRange;
+          //console.log(userConfigRange)
+          settingsContainer.style.display = 'none';
+          calcContainer.style.display = 'block';
+          init();
+
+        }, function(reason) {
+          console.error('error: ' + reason.result.error.message);
+          document.getElementById("welcome_text").innerHTML = reason.result.error.message;
+        });
       }
 
     </script>
