@@ -13,8 +13,8 @@
   <body class="bg-light">
 
     <div class="container pt-2">
-      <h4><i class="fas fa-syringe"></i> Insulin Calculator v0.6</h4>
-      <small id="welcome_text" class="text-muted">Please login with your Google account to access the app.</small>
+      <h4><i class="fas fa-syringe"></i> Insulin Calculator v1.0</h4>
+      <p id="welcome_text">Please login with your Google account to access the app.</p>
     </div>
 
     <div id="login-container" class="container pt-2" style="display: none;">
@@ -30,111 +30,102 @@
       <div class="row">
         <div class="col-md-8 order-md-8 mb-8">
           <h5 id="settings_title"><i class="fas fa-user-cog"></i>Settings</h5>
-          <p>Before you can use this app you need to configure your settings. </p>
+          <p>Before you can use this app you need to configure your settings. After you set your weight,
+            the remaining settings will be auto-calcuated, but you can fine tune if you wish.</p>
         </div>
       </div>
       <div class="row pt-1">
         <div class="col-md-8 order-md-8 mb-8">
           <label for="body_weight"><i class="fas fa-weight"></i> Current body weight (kg)</label>
-          <input type="number" class="form-control is-valid" id="config-weight" placeholder="" required="true" value="68">
+          <input type="number" class="form-control is-invalid" id="config-weight" placeholder="" required="true" onchange="calculateSettings()">
           <small class="text-muted">Body weight, used to determine total insulin requirement, correction factor and carb ratio</small>
         </div>
       </div>
       <div class="row pt-2">
         <div class="col-md-8 order-md-8 mb-8">
+          <label for="tdir-units">Total Daily Insulin Requirement</label>
+          <input type="number" class="form-control is-invalid" id="tdir-units" required="true" onchange="validateSettings()">
+          <small class="text-muted">Total amount of insulin required per day, based on body weight.</small>
+        </div>
+      </div>
+      <div class="row pt-2">
+        <div class="col-md-8 order-md-8 mb-8">
+          <label for="basal-units">Basal (Base) Units</label>
+          <input type="number" class="form-control is-invalid" id="basal-units" required="true" onchange="validateSettings()">
+          <small class="text-muted">Slow acting insulin, normally 40% of total insulin requirement.</small>
+        </div>
+      </div>
+      <div class="row pt-2">
+        <div class="col-md-8 order-md-8 mb-8">
           <label for="corr-factor">Correction factor</label>
-          <input type="number" class="form-control is-valid" id="config-corr-factor" placeholder="3" required="true" value="3">
+          <input type="number" class="form-control is-invalid" id="config-corr-factor" required="true" onchange="validateSettings()">
           <small class="text-muted">How much will 1 unit of insulin reduce the blood glucose level in mmol/L?</small>
         </div>
       </div>
       <div class="row pt-2">
         <div class="col-md-8 order-md-8 mb-8">
           <label for="ins-carb-ratio">Insulin : Carb ratio</label>
-          <input type="number" class="form-control is-valid" id="config-carb-ratio" placeholder="" required="true" value="10" >
-          <small class="text-muted">The amount of carbohydrate that 1 unit of insulin will dispose</small>
+          <input type="number" class="form-control is-invalid" id="config-carb-ratio" required="true" onchange="validateSettings()">
+          <small class="text-muted">The amount of carbohydrate that 1 unit of insulin will dispose. Note this value may fluctuate at different times of the day.</small>
         </div>
       </div>
       <div class="row pt-4">
         <div class="col-md-4 order-md-4 mb-4">
         </div>
         <div class="col-md-4 order-md-4 mb-4">
-          <button type="button" class="btn btn-outline-primary btn-block" id="save_button" onclick="saveUserConfig()"><i class="far fa-save"></i> Save</button>
+          <button type="button" class="btn btn-outline-success btn-block" id="save_button" onclick="saveUserConfig()"><i class="far fa-save"></i> Save</button>
         </div>
       </div>
     </div>
 
     <div id="calc-container" class="container pt-2" style="display: none;">
-      <div class="row pt-2">
+
+      <div class="row">
         <div class="col-md-8 order-md-8 mb-8">
-          <label for="bg-target"><i class="fas fa-thermometer-quarter"></i> Target blood glucose level</label>
+          <h6><i class="fas fa-thermometer-quarter"></i>  Blood Glucose</h6>
+          <p>Blood glucose levels in mmol/L</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4 order-md-4 mb-4">
+          <label for="bg-target"> Target</label>
           <input type="number" class="form-control is-valid" id="bg-target" placeholder="" required="true" value="7" onchange="calculate()">
-          <small class="text-muted">Target blood glucose level in mmol/L</small>
         </div>
-      </div>
-      <div class="row pt-2">
-        <div class="col-md-8 order-md-8 mb-8">
-          <label for="bg-current"><i class="fas fa-thermometer-half"></i> Current blood glucose level</label>
+        <div class="col-md-4 order-md-4 mb-4">
+          <label for="bg-current">Current</label>
           <input type="number" class="form-control" id="bg-current" placeholder="" required value="0" onchange="calculate()">
-          <small class="text-muted">Current blood glucose level in mmol/L</small>
+        </div>
+        <div class="col-md-8 order-md-8 mb-8">
+          <p id="corr_summary"></p>
         </div>
       </div>
       <div class="row pt-2">
         <div class="col-md-8 order-md-8 mb-8">
-          <label for="corr-factor">Correction factor</label>
-          <input type="number" class="form-control is-valid" id="corr-factor" placeholder="3" required="true" value="3" onchange="calculate()">
-          <small class="text-muted">How much will 1 unit of insulin reduce the blood glucose level in mmol/L?</small>
-        </div>
-      </div>
-      <div class="row pt-2">
-        <div class="col-md-8 order-md-8 mb-8">
-          <label for="corr-dose">Correction dose</label>
-          <input type="number" class="form-control" id="corr-dose" placeholder="" readonly="true">
-          <small class="text-muted">The amount of insulin required to lower blood glucose level to the target level</small>
-        </div>
-      </div>
-      <div class="row pt-2">
-        <div class="col-md-8 order-md-8 mb-8">
-          <label for="carb-total"><i class="fas fa-utensils"></i> Carb total</label>
+          <h6><i class="fas fa-utensils"></i>  Meal Metrics</h6>
+          <p>The total amount of carbs in grams.</p>
           <input type="number" class="form-control is-valid" id="carb-total" placeholder="" required="true" value="0" onchange="calculate()">
-          <small class="text-muted">The amount of carbohydrate in the meal in grams</small>
         </div>
       </div>
       <div class="row pt-2">
         <div class="col-md-8 order-md-8 mb-8">
-          <label for="ins-carb-ratio">Insulin : Carb ratio</label>
-          <input type="number" class="form-control" id="ins-carb-ratio" placeholder="" required="true" value="10" onchange="calculate()">
-          <small class="text-muted">The amount of carbohydrate that 1 unit of insulin will dispose</small>
+          <p id="carb_summary"></p>
         </div>
       </div>
-      <div class="row pt-2">
+      <div id="total_container" class="row pt-2" style="display: none;">
         <div class="col-md-8 order-md-8 mb-8">
-          <label for="carb-dose">Carb coverage dose</label>
-          <input type="number" class="form-control" id="carb-dose" placeholder="" readonly="true" required="true" >
-          <small class="text-muted">The amount of insulin required to dispose of the mealtime carbohydrate.</small>
+          <h6><i class="fas fa-calculator"></i>  Total Insulin</h6>
+          <p id="total_insulin"></p>
+          <p id="ceil_floor_insulin"></p>
         </div>
       </div>
-      <div class="row pt-2">
-        <div class="col-md-8 order-md-8 mb-8">
-          <label for="total-dose">Total Insulin</label>
-          <input type="number" class="form-control" id="total-dose" placeholder="" readonly="true" required="true" >
+      <div id="log_container" class="row pt-2" style="display: none;" >
+        <div class="col-md-4 order-md-4 mb-4">
+          <input type="hidden" id="ceil_insulin" placeholder="" required="true" value="0" />
+          <button type="button" class="btn btn-outline-primary btn-block" id="ceil_insulin_button" onclick='logCeilDose()'>Record 1</button>
         </div>
-      </div>
-      <div class="row pt-2">
-        <div class="col-md-8 order-md-8 mb-8">
-          <div class="card collapse" id="ceil-card">
-            <div class="card-body">
-              <p id="ceil-glucose" class="card-text"></p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="row pt-2">
-        <div class="col-md-8 order-md-8 mb-8">
-          <div class="card collapse" id="floor-card">
-            <div class="card-body">
-              <p id="floor-glucose" class="card-text"></p>
-            </div>
-          </div>
+        <div class="col-md-4 order-md-4 mb-4">
+          <input type="hidden" id="floor_insulin" placeholder="" required="true" value="0" />
+          <button type="button" class="btn btn-outline-primary btn-block" id="floor_insulin_button" onclick='logFloorDose();'>Record 2</button>
         </div>
       </div>
     </div>
@@ -142,10 +133,11 @@
     <div id="logout-container" class="container pt-2" style="display: none;">
       <div class="row">
         <div class="col-md-8 order-md-8 mb-8">
+          <button type="button" class="btn btn-primary btn-block" id="settings-button" onclick='showSettings();'><i class="fas fa-user-cog"></i> Settings</button>
           <button type="button" class="btn btn-outline-secondary btn-block" id="logout-button" onclick='signOut();'><i class="fab fa-google"></i> Sign Out</button>
         </div>
       </div>
-
+    </div>
 
     <script type="text/javascript">
       var CLIENT_ID = '150970289583-7dvobt6ku6i829hrvqgelfhsbcmiqbv1.apps.googleusercontent.com';
@@ -159,15 +151,78 @@
       var logoutContainer = document.getElementById('logout-container');
       var settingsContainer = document.getElementById('settings-container');
 
-      name = "unknown";
-      weight = 10;
-      corrFactor = 30;
-      carbRatio = 60;
+      savedUserConfig = false;
+      foundUserConfig = false;
+
+      d = new Date();
+      date = d.toLocaleDateString();
+      time = d.toLocaleTimeString();
+
+      function calculateSettings() {
+
+        weight = document.getElementById('config-weight').value;
+        if (weight < 200 && weight > 30) {
+          document.getElementById("config-weight").classList.remove('is-invalid');
+          document.getElementById("config-weight").classList.add('is-valid');
+        }
+        // Total Daily Insulin Requirement = 0.55 * weight
+        tdir = (0.55 * weight).toPrecision(2);
+        document.getElementById("tdir-units").value = tdir
+
+        // basal is 40% of tdir
+        basal = (tdir * 0.40).toPrecision(2);
+        document.getElementById("basal-units").value = basal
+
+        /*
+        The carbohydate coverage ratio:
+        500 ÷ Total Daily Insulin Dose
+        = 1 unit insulin covers so many grams of carbohydrate
+        */
+        var carbohydateCoverageRatio = (500 / tdir).toPrecision(3);
+        document.getElementById("config-carb-ratio").value = carbohydateCoverageRatio;
+
+        /*
+        The high blood sugar correction factor:
+        Correction Factor = 1800 ÷Total Daily Insulin Dose = 1 unit of insulin will reduce the blood sugar so many mg/dl
+        Divide by 18 to get mmol/l
+        */
+        var correctionFactor = (100 / tdir).toPrecision(3);
+        document.getElementById("config-corr-factor").value = correctionFactor;
+
+        validateSettings();
+
+      }
+
+      function validateSettings() {
+
+        if (document.getElementById('config-weight').value < 200 && document.getElementById('config-weight').value > 30) {
+          document.getElementById("config-weight").classList.remove('is-invalid');
+          document.getElementById("config-weight").classList.add('is-valid');
+        }
+
+        if (document.getElementById('tdir-units').value > 10) {
+          document.getElementById("tdir-units").classList.remove('is-invalid');
+          document.getElementById("tdir-units").classList.add('is-valid');
+        }
+
+        if (document.getElementById('basal-units').value > 10) {
+          document.getElementById("basal-units").classList.remove('is-invalid');
+          document.getElementById("basal-units").classList.add('is-valid');
+        }
+
+        if (document.getElementById('config-carb-ratio').value > 1) {
+          document.getElementById("config-carb-ratio").classList.remove('is-invalid');
+          document.getElementById("config-carb-ratio").classList.add('is-valid');
+        }
+        if (document.getElementById('config-corr-factor').value > 1) {
+          document.getElementById("config-corr-factor").classList.remove('is-invalid');
+          document.getElementById("config-corr-factor").classList.add('is-valid');
+        }
+
+
+      }
 
       function init(){
-        var d = new Date();
-        var date = d.toLocaleDateString();
-        var time = d.toLocaleTimeString();
         var hour = d.getHours();
         // morning
         if ( hour < 12 ){
@@ -199,35 +254,18 @@
         }
         document.getElementById("welcome_text").innerHTML = "Welcome " + firstName + " today is " + date + ", " + time + " (" + tod + ")"
         document.getElementById("bg-target").value = (targetBGMin+targetBGMax)/2
-        document.getElementById("ins-carb-ratio").value = carbRatio;
+        document.getElementById("corr_summary").innerHTML = "Your correction factor is set to <b>" + corrFactor  + "</b>, you can change this in the settings."
+        document.getElementById("carb_summary").innerHTML = "Your carbohydrate coverage ratio is set to <b>" + carbRatio  + "</b>, you can change this in the settings."
 
-
-        // Total Daily Insulin Requirement = 0.55 * weight
-        var tdir = 0.55 * weight;
-        // basal is 40% of tdir
-        var basal = tdir * 0.40
-
-        /*
-        The carbohydate coverage ratio:
-        500 ÷ Total Daily Insulin Dose
-        = 1 unit insulin covers so many grams of carbohydrate
-        */
-        // var carbohydateCoverageRatio = (500 / tdir).toPrecision(3);
-        //document.getElementById("ins-carb-ratio").value = carbohydateCoverageRatio;
-        document.getElementById("ins-carb-ratio").value = carbRatio
-
-        /*
-        The high blood sugar correction factor:
-        Correction Factor = 1800 ÷Total Daily Insulin Dose = 1 unit of insulin will reduce the blood sugar so many mg/dl
-        Divide by 18 to get mmol/l
-        */
-        var correctionFactor = 100 / tdir;
-
-        // var corrFactor = correctionFactor.toPrecision(3);
-        // document.getElementById("corr-factor").value = corrFactor;
-        document.getElementById("corr-factor").value = corrFactor
         // show calc
         document.getElementById("calc-container").style.display = 'block';
+
+        // hide totals and log
+        document.getElementById("total_container").style.display = 'none';
+        document.getElementById("log_container").style.display = 'none';
+        document.getElementById("bg-current").value = 0
+        document.getElementById("carb-total").value = 0
+        calculate();
 
       }
 
@@ -246,32 +284,31 @@
           document.getElementById("bg-current").classList.remove('is-invalid');
           document.getElementById("bg-current").classList.add('is-valid');
         }
-
-        var corrFactor = document.getElementById("corr-factor").value;
-        var corrDose = ((bgCurrent - bgTarget)/corrFactor);
-        document.getElementById("corr-dose").value = corrDose.toPrecision(3);
+        corrDose = ((bgCurrent - bgTarget)/corrFactor);
+        document.getElementById("corr_summary").innerHTML = "Your correction factor is set to <b>" + corrFactor  + "</b>, you can change this in the settings. You will need <b>" + corrDose.toPrecision(3) + "</b> units of insulin as a corrective dose."
 
         var carbTotal = document.getElementById("carb-total").value;
-        var carbRatio = document.getElementById("ins-carb-ratio").value;
         var carbDose = carbTotal / carbRatio;
-        document.getElementById("carb-dose").value = carbDose.toPrecision(3);
-
-        document.getElementById("total-dose").value = (corrDose + carbDose).toPrecision(3);
+        document.getElementById("carb_summary").innerHTML = "Your carbohydrate coverage ratio is set to <b>" + carbRatio  + "</b>, you can change this in the settings. You will need <b>" + carbDose.toPrecision(3) + "</b> units of insulin to cover the carbohydrate content of the meal. "
+        document.getElementById("total_insulin").innerHTML = "You will need a total of <b>" + (corrDose + carbDose).toPrecision(3) + "</b> units of insulin to correct blood glucose levels and to cover the carbohydrate content of the meal. "
 
         // what happens if we round up?
         ceilDose = Math.ceil(corrDose + carbDose)
+        document.getElementById("ceil_insulin").value = ceilDose;
         ceilCorrDose = ceilDose - carbDose;
         ceilBG = bgCurrent-(corrFactor*ceilCorrDose);
-        document.getElementById("ceil-glucose").innerHTML = "<b>" + ceilDose + "</b> insulin = blood glucose <b>" + ceilBG.toPrecision(2) + "</b> mmol/L"
-
         // what ghappens if we round down?
         floorDose = Math.floor(corrDose + carbDose)
+        document.getElementById("floor_insulin").value = floorDose;
         floorCorrDose = floorDose - carbDose;
         floorBG = bgCurrent-(corrFactor*floorCorrDose);
 
-        document.getElementById("floor-glucose").innerHTML = "<b>" + floorDose + "</b> insulin = blood glucose <b>" + floorBG.toPrecision(2)+ "</b> mmol/L"
-        $('.collapse').collapse('show')
+        document.getElementById("ceil_floor_insulin").innerHTML = "If you take <b>" + ceilDose + "</b> units of insulin, this should result in blood glucose level of <b>" + ceilBG.toPrecision(2) + "</b> mmol/L. If you take <b>" + floorDose + "</b> units of insulin, this should result in blood glucose level of <b>" + floorBG.toPrecision(2)+ "</b> mmol/L"
 
+        document.getElementById("total_container").style.display = 'block';
+        document.getElementById("ceil_insulin_button").innerHTML = "Log " + ceilDose + " units."
+        document.getElementById("floor_insulin_button").innerHTML = "Log " + floorDose + " units."
+        document.getElementById("log_container").style.display = 'block';
       }
 
       function handleClientLoad() {
@@ -310,6 +347,13 @@
         }
       }
 
+      function logCeilDose(){
+        logDose(document.getElementById("ceil_insulin").value);
+
+      }
+      function logFloorDose(){
+        logDose(document.getElementById("floor_insulin").value);
+      }
       function handleAuthClick(event) {
         gapi.auth2.getAuthInstance().signIn();
       }
@@ -321,6 +365,11 @@
         settingsContainer.style.display = 'none';
         calcContainer.style.display = 'none';
         document.getElementById("welcome_text").innerHTML = "Please login with your Google account to access the app."
+        weight = null;
+        tdir = null;
+        basal = null;
+        corrFactor = null;
+        carbRatio = null;
 
       }
 
@@ -333,37 +382,52 @@
       function getUserConfig(email) {
         gapi.client.sheets.spreadsheets.values.get({
           spreadsheetId: '1uSQONHR01QeRyEWGS5WRSQCBETzC-hc8p4i45DGjM-A',
-          range: 'UserConfig!A2:D9',
+          range: 'UserConfig!A2:K9',
           valueRenderOption: 'UNFORMATTED_VALUE',
         }).then(function(response) {
           var range = response.result;
-          var foundUserConfig = false;
-          if (range.values.length > 0) {
-            for (i = 0; i < range.values.length; i++) {
-              var row = range.values[i];
-              if (row[0] == email ){
-                foundUserConfig = true;
-                weight = row[1];
-                corrFactor = row[2];
-                carbRatio = row[3];
-                console.log("found user on row " + (i+2) )
-                userConfigRange = "UserConfig!A" + (i+2)
-                init();
+          if ('values' in range) {
+            if (range.values.length > 0 ) {
+              for (i = 0; i < range.values.length; i++) {
+                var row = range.values[i];
+                if (row[0] == email ){
+                  console.log(row)
+                  foundUserConfig = true;
+                  weight = row[1];
+                  corrFactor = row[2];
+                  carbRatio = row[3];
+                  tdir = row[4];
+                  basal = row[5];
+                  userConfigRange = "UserConfig!A" + (i+2)
+                  init();
+                }
               }
             }
-            if (! foundUserConfig) {
-              console.log('did not find user config for :' + name )
-              document.getElementById("welcome_text").innerHTML = "";
-              document.getElementById('settings_title').innerHTML = "<i class='fas fa-user-cog'></i> " + firstName + "'s Settings";
-              settingsContainer.style.display = 'block';
-            }
-          } else {
-            console.log('No data found.');
           }
+          if (! foundUserConfig) {
+            showSettings();
+          }
+
         }, function(response) {
           console.log('Error: ' + response.result.error.message);
           document.getElementById("welcome_text").innerHTML = response.result.error.message;
         });
+      }
+
+      function showSettings() {
+        document.getElementById("welcome_text").innerHTML = "";
+        document.getElementById('settings_title').innerHTML = "<i class='fas fa-user-cog'></i> " + firstName + "'s Settings";
+
+        if (foundUserConfig || savedUserConfig) {
+          document.getElementById('config-weight').value = weight;
+          document.getElementById('tdir-units').value = tdir;
+          document.getElementById('basal-units').value = basal;
+          document.getElementById('config-carb-ratio').value = carbRatio;
+          document.getElementById('config-corr-factor').value = corrFactor;
+        }
+        settingsContainer.style.display = 'block';
+        calcContainer.style.display = 'none';
+
       }
 
       function saveUserConfig() {
@@ -371,6 +435,8 @@
         weight = document.getElementById('config-weight').value;
         corrFactor = document.getElementById('config-corr-factor').value;
         carbRatio = document.getElementById('config-carb-ratio').value;
+        tdir = document.getElementById('tdir-units').value ;
+        basal = document.getElementById('basal-units').value;
         var params = {
           spreadsheetId: '1uSQONHR01QeRyEWGS5WRSQCBETzC-hc8p4i45DGjM-A',
           range: 'UserConfig!A1',
@@ -380,7 +446,38 @@
           "range": "UserConfig!A1",
            "majorDimension": "ROWS",
            "values": [
-             [ email, weight, corrFactor, carbRatio ]
+             [ email, weight, corrFactor, carbRatio, tdir, basal, date, time ]
+           ]
+        };
+        var request = gapi.client.sheets.spreadsheets.values.append(params, valueRangeBody);
+        request.then(function(response) {
+          //console.log(response.result);
+          userConfigRange = response.result.updates.updatedRange;
+          //console.log(userConfigRange)
+          settingsContainer.style.display = 'none';
+          calcContainer.style.display = 'block';
+          savedUserConfig =true;
+          init();
+
+        }, function(reason) {
+          console.error('error: ' + reason.result.error.message);
+          document.getElementById("welcome_text").innerHTML = reason.result.error.message;
+        });
+      }
+
+      function logDose(units){
+        glucose = document.getElementById('bg-current').value;
+        carbs = document.getElementById('carb-total').value;
+        var params = {
+          spreadsheetId: '1uSQONHR01QeRyEWGS5WRSQCBETzC-hc8p4i45DGjM-A',
+          range: 'Log!A1',
+          valueInputOption: 'USER_ENTERED',
+        };
+        var valueRangeBody = {
+          "range": "Log!A1",
+           "majorDimension": "ROWS",
+           "values": [
+             [ email, date, time, weight, corrFactor, carbRatio, tdir, basal, glucose, carbs, units ]
            ]
         };
         var request = gapi.client.sheets.spreadsheets.values.append(params, valueRangeBody);
